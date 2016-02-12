@@ -30,14 +30,11 @@ public class MigrationHelloWorld {
 		try{
 			
 			//connection = getConnection("jdbc:postgresql://bddesenv1.info.ufrn.br:5432/sigaa_20130218", "sigaa", "sigaa");
-			connection = getConnection("jdbc:postgresql://localhost:5432/sigaa", "postgres", "postgres");
+			connection = getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
 			
 			List<Object[]> data = readInformationFromPostgres(connection);
 			
 			writeInformationIntoMongoDB(data);
-			
-			// Se tudo ocorrer sem erro, comiga a transação
-			connection.commit();
 			
 		}catch(Exception ex){
 			ex.printStackTrace();
@@ -47,7 +44,7 @@ public class MigrationHelloWorld {
 			if (connection != null) connection.close();
 		}
 		
-		System.out.println(" ************** END "+(System.currentTimeMillis()-tempo)/1000+" segundos ************** ");
+		System.out.println(" ************** END in "+(System.currentTimeMillis()-tempo)/1000+" seconds ************** ");
 		System.exit(0);
 	}
     
@@ -59,7 +56,7 @@ public class MigrationHelloWorld {
 		
     	List<Object[]> data = new ArrayList<Object[]>();
     	
-    	String sql = " select p.id, p.name, p.  FROM public.person p  ";
+    	String sql = " select p.id, p.name, p.birth_date FROM public.person p  ";
 		
 		PreparedStatement ps = connection.prepareStatement( sql );
 		ps.execute();
@@ -106,6 +103,9 @@ public class MigrationHelloWorld {
 	 */
 	protected static void writeInformationIntoMongoDB(List<Object[]> data) {
 	
+		for (Object[] objects : data) {
+			System.out.println(objects[0]+" "+objects[1]+" "+objects[2]);
+		}
 			
 	}
 
