@@ -45,7 +45,6 @@ public class MigrationHelloWorld {
 			
 		}catch(Exception ex){
 			ex.printStackTrace();
-			if (connection != null) connection.rollback();
 			System.exit(1);
 		}finally{
 			if (connection != null) connection.close();
@@ -127,15 +126,15 @@ public class MigrationHelloWorld {
 				
 				Document doc = new Document("person",
 		                new Document()
-		                        .append("id", objects[1])
-		                        .append("name", objects[2])
-		                        .append("birth_date", objects[3]) );
+		                        .append("id", objects[0])
+		                        .append("name", objects[1])
+		                        .append("birth_date", objects[2]) );
 											
 				collection.insertOne(doc);
 			}
 			
 			// read information for mongoDB
-
+			System.out.println("print information on MongoBD....");
 			FindIterable<Document> cursorDocJSON = collection.find();
 			for (Document document : cursorDocJSON) {
 				System.out.println(document.toJson());
