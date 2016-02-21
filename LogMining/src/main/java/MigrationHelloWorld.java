@@ -36,7 +36,6 @@ public class MigrationHelloWorld {
 		
 		try{
 			
-			//connection = getConnection("jdbc:postgresql://bddesenv1.info.ufrn.br:5432/sigaa_20130218", "sigaa", "sigaa");
 			connection = getConnection("jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres");
 			
 			List<Object[]> data = readInformationFromPostgres(connection);
@@ -71,7 +70,6 @@ public class MigrationHelloWorld {
 		
 		while( rs.next() ){
 			
-			// Dados da inscrição atividade, não para para instanciar o objeto aqui.
 			int id = rs.getInt(1);
 			String name =  rs.getString(2);
 			Date birthDate = rs.getDate(3);
@@ -144,6 +142,5 @@ public class MigrationHelloWorld {
 			mongoClient.close();
 		}
 	}
-
-
+	
 }
