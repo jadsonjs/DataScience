@@ -1,0 +1,6 @@
+lstm_layer_size = 100
+dence_layer_size = 10
+batch_size= 16
+epochs=30
+
+optimizer=Adamax(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0),

@@ -1,0 +1,13 @@
+
+
+== operations  ====
+1. Create new Event
+2. Open Submission Period
+3. Open Subscription Period
+4. Create programming
+5. Create Keynotes
+6. Distribute Submission
+7. Create Event Page
+8. Perform Evaluation
+0. Make Submission
+10. Make Subscription
