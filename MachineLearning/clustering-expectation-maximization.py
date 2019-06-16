@@ -4,6 +4,8 @@
 # can be freely redistributed for research, classes or private studies,
 # since the copyright notices are not removed.
 #
+# This code Calculates the unsupervised model ***Expecation Maximization***
+#
 # Jadson Santos - jadsonjs@gmail.com
 # base on: alexlimatds - https://github.com/alexlimatds/doctorate_machine_learning
 # 
@@ -34,10 +36,37 @@ gtruth = df['diagnosis']
 
 
 
-#########################   Silhouettes   #########################
+#########################   Davies-Bouldin   #########################
 
-silhouettes = {}
-def calcSilhouettes(preds, k):
+# keep the final indexes the will be save to a file
+dbsIndexes = {}
+
+# calc DB index using
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.davies_bouldin_score.html
+def calcDBsIndexes(preds, k):
+  db = davies_bouldin_score(df, preds)
+  dbsIndexes[k].append(db)
+
+# salve in a file the DB indexes
+def printDBsIndexesToFile():
+  log_file = open('em-DBs.txt', 'w+')
+  log_file.write('k,DB_1,DB_2,DB_3,DB_4,DB_5\n')
+  for k in dbsIndexes.keys():
+    v = ','.join(map(str, dbsIndexes[k]))
+    log_file.write('{},{}\n'.format(k, v))
+  log_file.close()
+
+
+
+
+#########################   silhouettesIndexes   #########################
+
+# keep the final indexes the will be save to a file
+silhouettesIndexes = {}
+
+# calc silhouette index using
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_samples.html
+def calcSilhouettesIndexes(preds, k):
   # Compute the silhouette scores for each instance
   sample_silhouette_values = silhouette_samples(df, preds)
   #iterate over clusters numbers
@@ -47,45 +76,38 @@ def calcSilhouettes(preds, k):
     #getting silhouette of ith cluster
     avg += sample_silhouette_values[preds == c_i].mean()
   avg = avg / clusters.size
-  silhouettes[k].append(avg)
+  silhouettesIndexes[k].append(avg)
 
-def printSilhouettes():
-  log_file = open('em-silhouettes.txt', 'w+')
+# salve in a file the silhouttes indexes
+def printSilhouettesIndexesToFile():
+  log_file = open('em-silhouettesIndexes.txt', 'w+')
   log_file.write('k,silhouette_1,silhouette_2,silhouette_3,silhouette_4,silhouette_5\n')
-  for k in silhouettes.keys():
-    v = ','.join(map(str, silhouettes[k]))
+  for k in silhouettesIndexes.keys():
+    v = ','.join(map(str, silhouettesIndexes[k]))
     log_file.write('{},{}\n'.format(k, v))
   log_file.close()
 
 
-#########################   Davies-Bouldin   #########################
 
-dbs = {}
-def calcDBs(preds, k):
-  db = davies_bouldin_score(df, preds)
-  dbs[k].append(db)
-
-def printDBs():
-  log_file = open('em-DBs.txt', 'w+')
-  log_file.write('k,DB_1,DB_2,DB_3,DB_4,DB_5\n')
-  for k in dbs.keys():
-    v = ','.join(map(str, dbs[k]))
-    log_file.write('{},{}\n'.format(k, v))
-  log_file.close()
 
 
 #########################   Adjusted Rand   #########################
 
-crs = {}
-def calcCRs(preds, k):
-  cr = adjusted_rand_score(gtruth, preds)
-  crs[k].append(cr)
+# keep the final indexes the will be save to a file
+crsIndexes = {}
 
-def printCRs():
+# calc CR index using
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html
+def calcCRsIndexes(preds, k):
+  cr = adjusted_rand_score(gtruth, preds)
+  crsIndexes[k].append(cr)
+
+# salve in a file the CR indexes
+def printCRsIndexesToFile():
   log_file = open('em-CRs.txt', 'w+')
   log_file.write('k,CR_1,CR_2,CR_3,CR_4,CR_5\n')
-  for k in crs.keys():
-    v = ','.join(map(str, crs[k]))
+  for k in crsIndexes.keys():
+    v = ','.join(map(str, crsIndexes[k]))
     log_file.write('{},{}\n'.format(k, v))
   log_file.close()
   
@@ -98,16 +120,16 @@ def printCRs():
 # be calculated for all generated partitions (built-up clusters).
 
 for k in range(2, 21):
-  silhouettes[k] = []
-  dbs[k] = []
-  crs[k] = []
+  silhouettesIndexes[k] = []
+  dbsIndexes[k] = []
+  crsIndexes[k] = []
   for i in range(1, 6):
     algorithm = GaussianMixture(n_components=k, init_params='random')
     predictions = algorithm.fit_predict(df)
-    calcSilhouettes(predictions, k)
-    calcDBs(predictions, k)
-    calcCRs(predictions, k)
+    calcSilhouettesIndexes(predictions, k)
+    calcDBsIndexes(predictions, k)
+    calcCRsIndexes(predictions, k)
 
-printSilhouettes()
-printDBs()
-printCRs()
+printSilhouettesIndexesToFile()
+printDBsIndexesToFile()
+printCRsIndexesToFile()

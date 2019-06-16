@@ -4,6 +4,8 @@
 # can be freely redistributed for research, classes or private studies,
 # since the copyright notices are not removed.
 #
+# This code Calculates the unsupervised model *** Hierarchical Agglemerative ***
+#
 # Jadson Santos - jadsonjs@gmail.com
 # base on: alexlimatds - https://github.com/alexlimatds/doctorate_machine_learning
 # 
@@ -34,10 +36,39 @@ gtruth = df['diagnosis']
 # remove the class because is unsupervisor
 df = df.drop(columns="diagnosis")
 
-#########################   Silhouettes   #########################
 
-silhouettes = {}
-def calcSilhouettes(preds, k):
+
+#########################   Davies-Bouldin   #########################
+
+# keep the final indexes the will be save to a file
+dbsIndexes = {}
+
+# calc DB index using
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.davies_bouldin_score.html
+def calcDBsIndexes(preds, k):
+  db = davies_bouldin_score(df, preds)
+  dbsIndexes[k].append(db)
+
+# salve in a file the DB indexes
+def printDBsIndexesToFile():
+  log_file = open('agglomerative-DBs.txt', 'w+')
+  log_file.write('k,DB_1\n')
+  for k in dbsIndexes.keys():
+    log_file.write('{},{}\n'.format(k, dbsIndexes[k][0]))
+  log_file.close()
+
+
+
+
+
+#########################   silhouettesIndexes   #########################
+
+# keep the final indexes the will be save to a file
+silhouettesIndexes = {}
+
+# calc silhouette index using
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_samples.html
+def calcSilhouettesIndexes(preds, k):
   # Compute the silhouette scores for each instance
   sample_silhouette_values = silhouette_samples(df, preds)
   #iterate over clusters numbers
@@ -47,43 +78,37 @@ def calcSilhouettes(preds, k):
     #getting silhouette of ith cluster
     avg += sample_silhouette_values[preds == c_i].mean()
   avg = avg / clusters.size
-  silhouettes[k].append(avg)
+  silhouettesIndexes[k].append(avg)
 
-def printSilhouettes():
-  log_file = open('agglomerative-silhouettes.txt', 'w+')
+# salve in a file the silhouttes indexes
+def printSilhouettesIndexesToFile():
+  log_file = open('agglomerative-silhouettesIndexes.txt', 'w+')
   log_file.write('k,silhouette_1\n')
-  for k in silhouettes.keys():
-    v = ','.join(map(str, silhouettes[k]))
+  for k in silhouettesIndexes.keys():
+    v = ','.join(map(str, silhouettesIndexes[k]))
     log_file.write('{},{}\n'.format(k, v))
   log_file.close()
 
 
-#########################   Davies-Bouldin   #########################
 
-dbs = {}
-def calcDBs(preds, k):
-  db = davies_bouldin_score(df, preds)
-  dbs[k].append(db)
-
-def printDBs():
-  log_file = open('agglomerative-DBs.txt', 'w+')
-  log_file.write('k,DB_1\n')
-  for k in dbs.keys():
-    log_file.write('{},{}\n'.format(k, dbs[k][0]))
-  log_file.close()
 
 #########################   Adjusted Rand   #########################
 
-crs = {}
-def calcCRs(preds, k):
-  cr = adjusted_rand_score(gtruth, preds)
-  crs[k].append(cr)
+# keep the final indexes the will be save to a file
+crsIndexes = {}
 
-def printCRs():
+# calc CR index using
+# https://scikit-learn.org/stable/modules/generated/sklearn.metrics.adjusted_rand_score.html
+def calcCRsIndexes(preds, k):
+  cr = adjusted_rand_score(gtruth, preds)
+  crsIndexes[k].append(cr)
+
+# salve in a file the CR indexes
+def printCRsIndexesToFile():
   log_file = open('agglomerative-CRs.txt', 'w+')
   log_file.write('k,CR_1\n')
-  for k in crs.keys():
-    log_file.write('{},{}\n'.format(k, crs[k][0]))
+  for k in crsIndexes.keys():
+    log_file.write('{},{}\n'.format(k, crsIndexes[k][0]))
   log_file.close()
 
 
@@ -96,17 +121,17 @@ def printCRs():
 # and finally define the best number of groups for the three indexes.
 
 for k in range(2, 21):
-  silhouettes[k] = []
-  dbs[k] = []
-  crs[k] = []
+  silhouettesIndexes[k] = []
+  dbsIndexes[k] = []
+  crsIndexes[k] = []
   for i in range(0, k):
-    silhouettes[k].insert(i, [])
+    silhouettesIndexes[k].insert(i, [])
   algorithm = AgglomerativeClustering(n_clusters=k, linkage='average')
   predictions = algorithm.fit_predict(df)
-  calcSilhouettes(predictions, k)
-  calcDBs(predictions, k)
-  calcCRs(predictions, k)
+  calcSilhouettesIndexes(predictions, k)
+  calcDBsIndexes(predictions, k)
+  calcCRsIndexes(predictions, k)
 
-printSilhouettes()
-printDBs()
-printCRs()
+printSilhouettesIndexesToFile()
+printDBsIndexesToFile()
+printCRsIndexesToFile()
